@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Pendências SEV</title>
+    <link rel="stylesheet" href="estilos/style.css">
+</head>
+<body>
+    <main>
+        <section id="telaUpload" class="container tela ativa">
+            <h1>Instruções</h1>
+            <ol>
+                <li>Acesse o <b>SDA</b> → <b>Gestão e Veículos</b> → <b>Veículos</b>.</li>
+                <li>Em <b>MACUV</b>, selecione o ano desejado.</li>
+                <li>Baixe os relatórios de cada carro da agência.</li>
+                <li>Abra cada arquivo `.xls` no Excel e salve como `.csv` com <b>separador `;`</b> e <b>codificação UTF-8</b> (Arquivo → Salvar como → CSV UTF-8).</li>
+                <li>Mantenha no nome do arquivo a placa do veículo no formato <b>AAA-AAAA</b> (ex.: <code>SSP-1F53</code>).</li>
+            </ol>
+
+            <hr>
+
+            <h2>Selecione os arquivos dos relatórios</h2>
+            <input type="file" id="fileInput" accept=".csv" multiple>
+            <div class="acoes-upload">
+                <button id="btnProcessar" type="button">Processar arquivos</button>
+                <button id="btnAbrirMotoristas" type="button" class="btn-secundario">Cadastrar motoristas</button>
+            </div>
+            <p id="feedback" class="feedback" aria-live="polite"></p>
+
+            <div class="disclaimer">
+                <small>
+                    <em>Este projeto é não oficial, criado apenas para facilitar a visualização das inconsistências dos relatórios. Nenhuma informação é enviada ou armazenada fora do seu computador. Uso livre e sem vínculo institucional.</em>
+                </small>
+            </div>
+        </section>
+
+        <section id="telaResultados" class="container tela" aria-hidden="true">
+            <div class="cabecalho-resultado">
+                <h1>Itens extraídos</h1>
+                <div class="acoes-resultado">
+                    <button id="btnGerenciarMotoristas" type="button" class="btn-secundario">Cadastrar motoristas</button>
+                    <button id="btnVoltar" type="button" class="btn-secundario">Processar novos arquivos</button>
+                </div>
+            </div>
+
+            <div id="resumoGeral" class="resumo"></div>
+
+            <div class="tabela-wrapper">
+                <table id="tabelaItens">
+                    <thead>
+                        <tr>
+                            <th>Arquivo</th>
+                            <th>Placa</th>
+                            <th>Data</th>
+                            <th>Hora início</th>
+                            <th>Hora fim</th>
+                            <th>Km início</th>
+                            <th>Km fim</th>
+                            <th>Km rodado</th>
+                            <th>Origem</th>
+                            <th>Destino</th>
+                            <th>Motorista</th>
+                            <th>Finalidade</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="telaMotoristas" class="container tela" aria-hidden="true">
+            <div class="cabecalho-resultado">
+                <h1>Cadastro de motoristas</h1>
+                <button id="btnVoltarMotoristas" type="button" class="btn-secundario">Voltar</button>
+            </div>
+
+            <p class="instrucao-motorista">
+                Verificar no SDA qual código pertence a qual motorista e preencher abaixo.
+            </p>
+
+            <form id="formMotorista" class="form-motorista">
+                <label for="codigoMotorista">Código do motorista</label>
+                <input id="codigoMotorista" type="text" placeholder="Ex.: 8048668998" required>
+
+                <label for="nomeMotorista">Nome do motorista</label>
+                <input id="nomeMotorista" type="text" placeholder="Ex.: João da Silva" required>
+
+                <button type="submit">Salvar motorista</button>
+            </form>
+
+            <h2>Mapeamentos salvos</h2>
+            <div class="tabela-wrapper">
+                <table id="tabelaMotoristas">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nome</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="scripts/processamento_csv.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
