@@ -159,7 +159,9 @@ function formatarResumoRegistro(item) {
     const fim = item.hora_fim || '-';
     const origem = item.origem || '-';
     const destino = item.destino || '-';
-    return `${data} | ${inicio} -> ${fim} | ${origem} -> ${destino}`;
+    const motorista = resolverNomeMotorista(item.motorista) || '-';
+    const finalidade = item.finalidade || '-';
+    return `${data} | ${inicio} -> ${fim} | ${origem} -> ${destino} | Motorista: ${motorista} | Finalidade: ${finalidade}`;
 }
 
 function calcularUsoPorViatura(itens) {
