@@ -35,6 +35,10 @@ main {
     padding: 32px;
 }
 
+#telaResultados.container {
+    width: 100%;
+}
+
 .tela {
     display: none;
 }
@@ -153,21 +157,100 @@ button:hover {
     display: flex;
     gap: 12px;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
 }
 
+.subtitulo-resultado {
+    margin: -8px 0 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
 .resumo {
-    margin-top: 6px;
-    padding: 12px 14px;
-    background: #f0fdfa;
+    margin-top: 10px;
+    padding: 14px 16px;
+    background: linear-gradient(120deg, #f0fdfa 0%, #ecfeff 100%);
     border: 1px solid #99f6e4;
-    border-radius: 8px;
+    border-radius: 12px;
     font-weight: 600;
+}
+
+.secao-resultado {
+    margin-top: 18px;
+    border: 1px solid #dbe7f5;
+    border-radius: 14px;
+    padding: 14px;
+    background: #f8fafc;
+}
+
+.secao-resultado h2 {
+    margin-top: 0;
+}
+
+.secao-destaque {
+    background: #fffdf8;
+    border-color: #f3d9ac;
 }
 
 .tabela-wrapper {
     overflow-x: auto;
+}
+
+.tabela-wrapper-uso-viatura {
+    max-width: 720px;
+}
+
+.lista-pendencias {
+    margin-top: 6px;
+    display: grid;
+    gap: 14px;
+}
+
+.sem-pendencias {
+    background: #ecfdf5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-weight: 600;
+}
+
+.pendencia-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+    padding: 12px;
+}
+
+.pendencia-cabecalho {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pendencia-cabecalho h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.pendencia-total {
+    font-size: 0.85rem;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-weight: 700;
+}
+
+.diferenca-km {
+    font-weight: 700;
+    color: #991b1b;
 }
 
 table {

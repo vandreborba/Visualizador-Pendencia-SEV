@@ -30,14 +30,17 @@
 
             <div class="disclaimer">
                 <small>
-                    <em>Este projeto é não oficial, criado apenas para facilitar a visualização das inconsistências dos relatórios. Nenhuma informação é enviada ou armazenada fora do seu computador. Uso livre e sem vínculo institucional.</em>
+                    <em>Esta ferramenta é independente e não oficial, desenvolvida por iniciativa pessoal, sem vínculo, patrocínio ou validação por qualquer órgão ou instituição. O uso é voluntário e de responsabilidade exclusiva do usuário. Os resultados têm caráter auxiliar e não substituem a conferência nos sistemas e documentos oficiais. Não há garantia de exatidão, disponibilidade ou aderência a normas internas. Os dados são processados localmente no navegador, sem envio automático a servidores externos.</em>
                 </small>
             </div>
         </section>
 
         <section id="telaResultados" class="container tela" aria-hidden="true">
             <div class="cabecalho-resultado">
-                <h1>Itens extraídos</h1>
+                <div>
+                    <h1>Painel de resultados dos relatórios</h1>
+                    <p class="subtitulo-resultado">Visão consolidada por viatura, pendências e registros processados.</p>
+                </div>
                 <div class="acoes-resultado">
                     <button id="btnGerenciarMotoristas" type="button" class="btn-secundario">Cadastrar motoristas</button>
                     <button id="btnVoltar" type="button" class="btn-secundario">Processar novos arquivos</button>
@@ -46,27 +49,51 @@
 
             <div id="resumoGeral" class="resumo"></div>
 
-            <div class="tabela-wrapper">
-                <table id="tabelaItens">
-                    <thead>
-                        <tr>
-                            <th>Arquivo</th>
-                            <th>Placa</th>
-                            <th>Data</th>
-                            <th>Hora início</th>
-                            <th>Hora fim</th>
-                            <th>Km início</th>
-                            <th>Km fim</th>
-                            <th>Km rodado</th>
-                            <th>Origem</th>
-                            <th>Destino</th>
-                            <th>Motorista</th>
-                            <th>Finalidade</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+            <section class="secao-resultado">
+                <h2>Uso por viatura</h2>
+                <div class="tabela-wrapper tabela-wrapper-uso-viatura">
+                    <table id="tabelaUsoViaturas">
+                        <thead>
+                            <tr>
+                                <th>Viatura</th>
+                                <th>Percentual de uso por tempo de viagem</th>
+                                <th>Percentual de uso por km rodados</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="secao-resultado secao-destaque">
+                <h2>Pendências de quilometragem</h2>
+                <div id="listaPendencias" class="lista-pendencias"></div>
+            </section>
+
+            <section class="secao-resultado">
+                <h2>Registros processados</h2>
+                <div class="tabela-wrapper">
+                    <table id="tabelaItens">
+                        <thead>
+                            <tr>
+                                <th>Arquivo</th>
+                                <th>Placa</th>
+                                <th>Data</th>
+                                <th>Hora início</th>
+                                <th>Hora fim</th>
+                                <th>Km início</th>
+                                <th>Km fim</th>
+                                <th>Km rodado</th>
+                                <th>Origem</th>
+                                <th>Destino</th>
+                                <th>Motorista</th>
+                                <th>Finalidade</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
         </section>
 
         <section id="telaMotoristas" class="container tela" aria-hidden="true">
@@ -109,3 +136,4 @@
     <script src="scripts/main.js"></script>
 </body>
 </html>
+

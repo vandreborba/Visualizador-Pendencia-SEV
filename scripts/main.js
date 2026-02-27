@@ -11,6 +11,8 @@ const btnGerenciarMotoristas = document.getElementById('btnGerenciarMotoristas')
 const btnVoltarMotoristas = document.getElementById('btnVoltarMotoristas');
 const feedback = document.getElementById('feedback');
 const resumoGeral = document.getElementById('resumoGeral');
+const corpoTabelaUsoViaturas = document.querySelector('#tabelaUsoViaturas tbody');
+const listaPendencias = document.getElementById('listaPendencias');
 const corpoTabelaItens = document.querySelector('#tabelaItens tbody');
 const formMotorista = document.getElementById('formMotorista');
 const codigoMotoristaInput = document.getElementById('codigoMotorista');
@@ -52,6 +54,282 @@ function resolverNomeMotorista(valorMotorista) {
     if (!codigo) return '';
     const mapeamento = carregarMapeamentoMotoristas();
     return mapeamento[codigo] || codigo;
+}
+
+function normalizarTextoNumerico(valor) {
+    const texto = String(valor || '').trim();
+    if (!texto) return null;
+
+    const limpo = texto.replace(/[^\d,.-]/g, '');
+    if (!limpo || limpo === '-' || limpo === '.' || limpo === ',') return null;
+
+    let normalizado = limpo;
+    const temVirgula = normalizado.includes(',');
+    const temPonto = normalizado.includes('.');
+
+    if (temVirgula && temPonto) {
+        if (normalizado.lastIndexOf(',') > normalizado.lastIndexOf('.')) {
+            normalizado = normalizado.replace(/\./g, '').replace(',', '.');
+        } else {
+            normalizado = normalizado.replace(/,/g, '');
+        }
+    } else if (temVirgula) {
+        normalizado = normalizado.replace(',', '.');
+    }
+
+    return normalizado;
+}
+
+function converterKmParaNumero(valor) {
+    const normalizado = normalizarTextoNumerico(valor);
+    if (normalizado === null) return 0;
+    const numero = Number(normalizado);
+    return Number.isFinite(numero) ? numero : 0;
+}
+
+function converterKmParaNumeroOuNulo(valor) {
+    const normalizado = normalizarTextoNumerico(valor);
+    if (normalizado === null) return null;
+    const numero = Number(normalizado);
+    return Number.isFinite(numero) ? numero : null;
+}
+
+function converterHoraParaMinutos(valor) {
+    const texto = String(valor || '').trim();
+    const match = texto.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (!match) return null;
+
+    const horas = Number(match[1]);
+    const minutos = Number(match[2]);
+    const segundos = Number(match[3] || 0);
+
+    if (!Number.isInteger(horas) || !Number.isInteger(minutos) || !Number.isInteger(segundos)) {
+        return null;
+    }
+    if (horas < 0 || horas > 23 || minutos < 0 || minutos > 59 || segundos < 0 || segundos > 59) {
+        return null;
+    }
+
+    return (horas * 60) + minutos + (segundos / 60);
+}
+
+function calcularDuracaoViagemEmMinutos(horaInicio, horaFim) {
+    const inicio = converterHoraParaMinutos(horaInicio);
+    const fim = converterHoraParaMinutos(horaFim);
+    if (inicio === null || fim === null) return 0;
+
+    let duracao = fim - inicio;
+    if (duracao < 0) duracao += 24 * 60;
+    return duracao;
+}
+
+function formatarPercentual(valor) {
+    return `${valor.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    })}%`;
+}
+
+function formatarKm(valor) {
+    if (valor === null || valor === undefined || Number.isNaN(valor)) return '-';
+    return valor.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+}
+
+function converterDataHoraParaTimestamp(data, hora, indiceOriginal) {
+    const dataTexto = String(data || '').trim();
+    const matchData = dataTexto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const minutosHora = converterHoraParaMinutos(hora) ?? 0;
+
+    if (!matchData) return Number.MAX_SAFE_INTEGER - (100000 - indiceOriginal);
+
+    const dia = Number(matchData[1]);
+    const mes = Number(matchData[2]);
+    const ano = Number(matchData[3]);
+    const horaInteira = Math.floor(minutosHora / 60);
+    const minuto = Math.floor(minutosHora % 60);
+    return new Date(ano, mes - 1, dia, horaInteira, minuto, 0, 0).getTime();
+}
+
+function formatarResumoRegistro(item) {
+    const data = item.data || '-';
+    const inicio = item.hora_inicio || '-';
+    const fim = item.hora_fim || '-';
+    const origem = item.origem || '-';
+    const destino = item.destino || '-';
+    return `${data} | ${inicio} -> ${fim} | ${origem} -> ${destino}`;
+}
+
+function calcularUsoPorViatura(itens) {
+    const agregados = new Map();
+    let totalTempoMinutos = 0;
+    let totalKmRodado = 0;
+
+    itens.forEach((item) => {
+        const placa = (item.placa || '').trim() || 'Não identificada';
+        const kmRodado = converterKmParaNumero(item.km_rodado);
+        const tempoMinutos = calcularDuracaoViagemEmMinutos(item.hora_inicio, item.hora_fim);
+        const atual = agregados.get(placa) || { placa, tempoMinutos: 0, kmRodado: 0 };
+
+        atual.tempoMinutos += tempoMinutos;
+        atual.kmRodado += kmRodado;
+        totalTempoMinutos += tempoMinutos;
+        totalKmRodado += kmRodado;
+        agregados.set(placa, atual);
+    });
+
+    return Array.from(agregados.values())
+        .map((viatura) => ({
+            placa: viatura.placa,
+            percentualUsoTempo: totalTempoMinutos > 0 ? (viatura.tempoMinutos / totalTempoMinutos) * 100 : 0,
+            percentualUsoKm: totalKmRodado > 0 ? (viatura.kmRodado / totalKmRodado) * 100 : 0
+        }))
+        .sort((a, b) => {
+            if (b.percentualUsoTempo !== a.percentualUsoTempo) {
+                return b.percentualUsoTempo - a.percentualUsoTempo;
+            }
+            return b.percentualUsoKm - a.percentualUsoKm;
+        });
+}
+
+function renderizarUsoPorViatura(itens) {
+    if (!corpoTabelaUsoViaturas) return;
+    corpoTabelaUsoViaturas.innerHTML = '';
+
+    if (itens.length === 0) {
+        const linha = document.createElement('tr');
+        linha.innerHTML = '<td colspan="3">Sem dados para calcular o uso por viatura.</td>';
+        corpoTabelaUsoViaturas.appendChild(linha);
+        return;
+    }
+
+    const resumo = calcularUsoPorViatura(itens);
+    resumo.forEach((item) => {
+        const linha = document.createElement('tr');
+        linha.innerHTML = `
+            <td>${item.placa}</td>
+            <td>${formatarPercentual(item.percentualUsoTempo)}</td>
+            <td>${formatarPercentual(item.percentualUsoKm)}</td>
+        `;
+        corpoTabelaUsoViaturas.appendChild(linha);
+    });
+}
+
+function identificarPendenciasPorViatura(itens) {
+    const itensComIndice = itens.map((item, indiceOriginal) => ({
+        ...item,
+        __indiceOriginal: indiceOriginal
+    }));
+
+    const agrupadosPorPlaca = new Map();
+    itensComIndice.forEach((item) => {
+        const placa = (item.placa || '').trim() || 'Não identificada';
+        const lista = agrupadosPorPlaca.get(placa) || [];
+        lista.push(item);
+        agrupadosPorPlaca.set(placa, lista);
+    });
+
+    const resultado = [];
+    agrupadosPorPlaca.forEach((registros, placa) => {
+        const ordenados = [...registros].sort((a, b) => {
+            const ordemA = converterDataHoraParaTimestamp(a.data, a.hora_inicio, a.__indiceOriginal);
+            const ordemB = converterDataHoraParaTimestamp(b.data, b.hora_inicio, b.__indiceOriginal);
+            if (ordemA !== ordemB) return ordemA - ordemB;
+            return a.__indiceOriginal - b.__indiceOriginal;
+        });
+
+        const pendencias = [];
+        for (let i = 1; i < ordenados.length; i += 1) {
+            const anterior = ordenados[i - 1];
+            const posterior = ordenados[i];
+            const kmFimAnterior = converterKmParaNumeroOuNulo(anterior.km_fim);
+            const kmInicioPosterior = converterKmParaNumeroOuNulo(posterior.km_inicio);
+
+            let descricao = '';
+            if (kmFimAnterior === null && kmInicioPosterior === null) {
+                descricao = 'Km fim anterior e km início posterior ausentes.';
+            } else if (kmFimAnterior === null) {
+                descricao = 'Km fim do registro anterior ausente.';
+            } else if (kmInicioPosterior === null) {
+                descricao = 'Km início do registro posterior ausente.';
+            } else {
+                const diferenca = Math.abs(kmInicioPosterior - kmFimAnterior);
+                if (diferenca > 0.0001) {
+                    descricao = `Diferença de ${formatarKm(diferenca)} km.`;
+                }
+            }
+
+            if (descricao) {
+                pendencias.push({
+                    anterior,
+                    posterior,
+                    kmFimAnterior,
+                    kmInicioPosterior,
+                    descricao
+                });
+            }
+        }
+
+        if (pendencias.length > 0) {
+            resultado.push({ placa, pendencias });
+        }
+    });
+
+    return resultado.sort((a, b) => a.placa.localeCompare(b.placa));
+}
+
+function renderizarPendencias(itens) {
+    if (!listaPendencias) return;
+    listaPendencias.innerHTML = '';
+
+    const grupos = identificarPendenciasPorViatura(itens);
+    if (grupos.length === 0) {
+        const semPendencia = document.createElement('div');
+        semPendencia.className = 'sem-pendencias';
+        semPendencia.textContent = 'Nenhuma pendência de quilometragem encontrada.';
+        listaPendencias.appendChild(semPendencia);
+        return;
+    }
+
+    grupos.forEach((grupo) => {
+        const card = document.createElement('article');
+        card.className = 'pendencia-card';
+
+        const linhas = grupo.pendencias.map((pendencia) => `
+            <tr>
+                <td>${formatarResumoRegistro(pendencia.anterior)}</td>
+                <td>${pendencia.anterior.km_fim || '-'}</td>
+                <td>${formatarResumoRegistro(pendencia.posterior)}</td>
+                <td>${pendencia.posterior.km_inicio || '-'}</td>
+                <td class="diferenca-km">${pendencia.descricao}</td>
+            </tr>
+        `).join('');
+
+        card.innerHTML = `
+            <div class="pendencia-cabecalho">
+                <h3>Viatura ${grupo.placa}</h3>
+                <span class="pendencia-total">${grupo.pendencias.length} pendência(s)</span>
+            </div>
+            <div class="tabela-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Registro anterior</th>
+                            <th>Km fim (anterior)</th>
+                            <th>Registro posterior</th>
+                            <th>Km início (posterior)</th>
+                            <th>Detalhe</th>
+                        </tr>
+                    </thead>
+                    <tbody>${linhas}</tbody>
+                </table>
+            </div>
+        `;
+
+        listaPendencias.appendChild(card);
+    });
 }
 
 function renderizarTabelaMotoristas() {
@@ -135,13 +413,15 @@ async function extrairRegistrosArquivo(file) {
 
 function renderizarItensExtraidos(itens) {
     corpoTabelaItens.innerHTML = '';
+    renderizarUsoPorViatura(itens);
+    renderizarPendencias(itens);
 
     if (itens.length === 0) {
-        resumoGeral.textContent = 'Nenhum item extraído. Verifique o formato do arquivo CSV.';
+        resumoGeral.textContent = 'Nenhum registro processado. Verifique o formato do arquivo CSV.';
         return;
     }
 
-    resumoGeral.textContent = `Itens extraídos: ${itens.length}`;
+    resumoGeral.textContent = `Registros processados: ${itens.length}`;
 
     itens.forEach(item => {
         const linha = document.createElement('tr');
