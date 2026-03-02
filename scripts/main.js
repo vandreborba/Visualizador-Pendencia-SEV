@@ -138,6 +138,13 @@ function formatarKm(valor) {
     });
 }
 
+function formatarTempo(minutos) {
+    if (minutos === null || minutos === undefined || Number.isNaN(minutos)) return '-';
+    const h = Math.floor(minutos / 60);
+    const m = Math.floor(minutos % 60);
+    return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}min`;
+}
+
 function converterDataHoraParaTimestamp(data, hora, indiceOriginal) {
     const dataTexto = String(data || '').trim();
     const matchData = dataTexto.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
@@ -173,20 +180,27 @@ function calcularUsoPorViatura(itens) {
         const placa = (item.placa || '').trim() || 'Não identificada';
         const kmRodado = converterKmParaNumero(item.km_rodado);
         const tempoMinutos = calcularDuracaoViagemEmMinutos(item.hora_inicio, item.hora_fim);
-        const atual = agregados.get(placa) || { placa, tempoMinutos: 0, kmRodado: 0 };
+        const atual = agregados.get(placa) || { placa, tempoMinutos: 0, kmRodado: 0, numViagens: 0 };
 
         atual.tempoMinutos += tempoMinutos;
         atual.kmRodado += kmRodado;
+        atual.numViagens += 1;
         totalTempoMinutos += tempoMinutos;
         totalKmRodado += kmRodado;
         agregados.set(placa, atual);
     });
 
+    const totalViagens = itens.length;
+
     return Array.from(agregados.values())
         .map((viatura) => ({
             placa: viatura.placa,
-            percentualUsoTempo: totalTempoMinutos > 0 ? (viatura.tempoMinutos / totalTempoMinutos) * 100 : 0,
-            percentualUsoKm: totalKmRodado > 0 ? (viatura.kmRodado / totalKmRodado) * 100 : 0
+            numViagens: viatura.numViagens,
+            percentualViagens: totalViagens > 0 ? (viatura.numViagens / totalViagens) * 100 : 0,
+            totalKm: viatura.kmRodado,
+            percentualUsoKm: totalKmRodado > 0 ? (viatura.kmRodado / totalKmRodado) * 100 : 0,
+            totalTempoMinutos: viatura.tempoMinutos,
+            percentualUsoTempo: totalTempoMinutos > 0 ? (viatura.tempoMinutos / totalTempoMinutos) * 100 : 0
         }))
         .sort((a, b) => {
             if (b.percentualUsoTempo !== a.percentualUsoTempo) {
@@ -202,7 +216,7 @@ function renderizarUsoPorViatura(itens) {
 
     if (itens.length === 0) {
         const linha = document.createElement('tr');
-        linha.innerHTML = '<td colspan="3">Sem dados para calcular o uso por viatura.</td>';
+        linha.innerHTML = '<td colspan="7">Sem dados para calcular o uso por viatura.</td>';
         corpoTabelaUsoViaturas.appendChild(linha);
         return;
     }
@@ -212,8 +226,12 @@ function renderizarUsoPorViatura(itens) {
         const linha = document.createElement('tr');
         linha.innerHTML = `
             <td>${item.placa}</td>
-            <td>${formatarPercentual(item.percentualUsoTempo)}</td>
+            <td>${item.numViagens}</td>
+            <td>${formatarPercentual(item.percentualViagens)}</td>
+            <td>${formatarKm(item.totalKm)} km</td>
             <td>${formatarPercentual(item.percentualUsoKm)}</td>
+            <td>${formatarTempo(item.totalTempoMinutos)}</td>
+            <td>${formatarPercentual(item.percentualUsoTempo)}</td>
         `;
         corpoTabelaUsoViaturas.appendChild(linha);
     });

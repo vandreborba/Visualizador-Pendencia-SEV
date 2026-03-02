@@ -286,3 +286,19 @@ th {
         padding: 8px;
     }
 }
+
+.rodape-github {
+    text-align: center;
+    padding: 16px;
+    color: var(--muted);
+    font-size: 0.85rem;
+}
+
+.rodape-github a {
+    color: var(--muted);
+    text-decoration: underline;
+}
+
+.rodape-github a:hover {
+    color: var(--accent);
+}
