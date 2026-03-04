@@ -210,18 +210,31 @@ function calcularUsoPorViatura(itens) {
         });
 }
 
-function renderizarUsoPorViatura(itens) {
+const MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+function extrairMesAnoItem(item) {
+    const match = (item.data || '').match(/^\d{2}\/(\d{2})\/(\d{4})$/);
+    if (!match) return null;
+    return `${match[1]}/${match[2]}`;
+}
+
+function formatarMesAnoAbrev(mesAno) {
+    const [mes, ano] = mesAno.split('/');
+    return `${MESES_ABREV[Number(mes) - 1]}/${ano}`;
+}
+
+function renderizarTabelaUsoPorViatura(itensFiltrados) {
     if (!corpoTabelaUsoViaturas) return;
     corpoTabelaUsoViaturas.innerHTML = '';
 
-    if (itens.length === 0) {
+    if (itensFiltrados.length === 0) {
         const linha = document.createElement('tr');
         linha.innerHTML = '<td colspan="7">Sem dados para calcular o uso por viatura.</td>';
         corpoTabelaUsoViaturas.appendChild(linha);
         return;
     }
 
-    const resumo = calcularUsoPorViatura(itens);
+    const resumo = calcularUsoPorViatura(itensFiltrados);
     resumo.forEach((item) => {
         const linha = document.createElement('tr');
         linha.innerHTML = `
@@ -235,6 +248,49 @@ function renderizarUsoPorViatura(itens) {
         `;
         corpoTabelaUsoViaturas.appendChild(linha);
     });
+}
+
+function renderizarUsoPorViatura(itens) {
+    const tabsContainer = document.getElementById('tabsUsoViatura');
+
+    const mesesSet = new Set();
+    itens.forEach((item) => {
+        const mesAno = extrairMesAnoItem(item);
+        if (mesAno) mesesSet.add(mesAno);
+    });
+    const meses = Array.from(mesesSet).sort((a, b) => {
+        const [ma, ya] = a.split('/').map(Number);
+        const [mb, yb] = b.split('/').map(Number);
+        return ya !== yb ? ya - yb : ma - mb;
+    });
+
+    if (tabsContainer) {
+        tabsContainer.innerHTML = '';
+
+        if (meses.length > 1) {
+            const criarAba = (valor, rotulo, ativa) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'tab-viatura' + (ativa ? ' ativa' : '');
+                btn.dataset.tab = valor;
+                btn.textContent = rotulo;
+                btn.addEventListener('click', () => {
+                    tabsContainer.querySelectorAll('.tab-viatura').forEach((b) => b.classList.remove('ativa'));
+                    btn.classList.add('ativa');
+                    const filtrados = valor === 'geral'
+                        ? itens
+                        : itens.filter((i) => extrairMesAnoItem(i) === valor);
+                    renderizarTabelaUsoPorViatura(filtrados);
+                });
+                return btn;
+            };
+
+            tabsContainer.appendChild(criarAba('geral', 'Geral', true));
+            meses.forEach((m) => tabsContainer.appendChild(criarAba(m, formatarMesAnoAbrev(m), false)));
+        }
+    }
+
+    renderizarTabelaUsoPorViatura(itens);
 }
 
 function identificarPendenciasPorViatura(itens) {

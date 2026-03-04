@@ -77,7 +77,27 @@ hr {
 input[type="file"] {
     display: block;
     width: 100%;
-    margin: 8px 0 12px;
+    margin: 8px 0 4px;
+}
+
+.dica-multiplos-arquivos {
+    margin: 0 0 12px;
+    font-size: 0.88rem;
+    color: #374151;
+    background: #eff6ff;
+    border-left: 3px solid var(--primary);
+    padding: 8px 12px;
+    border-radius: 0 6px 6px 0;
+}
+
+.dica-multiplos-arquivos kbd {
+    display: inline-block;
+    padding: 1px 5px;
+    font-size: 0.82rem;
+    border: 1px solid #9ca3af;
+    border-radius: 4px;
+    background: #f9fafb;
+    font-family: monospace;
 }
 
 .acoes-upload,
@@ -201,6 +221,40 @@ button:hover {
     max-width: 720px;
 }
 
+.tabs-viatura {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.tab-viatura {
+    background: #f1f5f9;
+    color: var(--secondary);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.tab-viatura:hover {
+    background: #e2e8f0;
+    color: var(--secondary);
+}
+
+.tab-viatura.ativa {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+
+.tab-viatura.ativa:hover {
+    background: var(--primary-hover);
+}
+
 .lista-pendencias {
     margin-top: 6px;
     display: grid;
@@ -290,15 +344,24 @@ th {
 .rodape-github {
     text-align: center;
     padding: 16px;
-    color: var(--muted);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
-.rodape-github a {
-    color: var(--muted);
-    text-decoration: underline;
+.link-github {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #1f2937;
+    text-decoration: none;
+    font-weight: 600;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 8px 14px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.rodape-github a:hover {
-    color: var(--accent);
+.link-github:hover {
+    background: #f3f4f6;
+    border-color: #6b7280;
+    color: var(--primary);
 }
