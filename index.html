@@ -13,15 +13,14 @@
             <ol>
                 <li>Acesse o <b>SDA</b> → <b>Gestão e Veículos</b> → <b>Veículos</b>.</li>
                 <li>Em <b>MACUV</b>, selecione o ano desejado.</li>
-                <li>Baixe os relatórios de cada carro da agência.</li>
-                <li>Abra cada arquivo `.xls` no Excel e salve como `.csv` com <b>separador `;`</b> e <b>codificação UTF-8</b> (Arquivo → Salvar como → CSV UTF-8).</li>
+                <li>Baixe os relatórios de cada carro da agência no formato <code>.xls</code> — <strong>não é necessário converter para CSV</strong>.</li>
                 <li>Mantenha no nome do arquivo a placa do veículo no formato <b>AAA-AAAA</b> (ex.: <code>SSP-1F53</code>).</li>
             </ol>
 
             <hr>
 
             <h2>Selecione os arquivos dos relatórios</h2>
-            <input type="file" id="fileInput" accept=".csv" multiple>
+            <input type="file" id="fileInput" accept=".xls,.xlsx,.csv" multiple>
             <p class="dica-multiplos-arquivos">&#128161; Você pode selecionar <strong>vários arquivos de uma vez</strong>: segure <kbd>Ctrl</kbd> (ou <kbd>&#8984;</kbd> no Mac) e clique em cada arquivo desejado.</p>
             <div class="acoes-upload">
                 <button id="btnProcessar" type="button">Processar arquivos</button>
@@ -147,7 +146,9 @@
         </a>
     </footer>
 
+    <script src="libs/xlsx.full.min.js"></script>
     <script src="scripts/processamento_csv.js"></script>
+    <script src="scripts/processamento_xls.js"></script>
     <script src="scripts/main.js"></script>
 </body>
 </html>

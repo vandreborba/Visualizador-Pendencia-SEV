@@ -28,6 +28,9 @@ if (!btnProcessar || !fileInput || !telaUpload || !telaResultados) {
 if (typeof window.processarCSVPorData !== 'function') {
     console.error('[SEV] processarCSVPorData não carregado.');
 }
+if (typeof window.extrairRegistrosXLS !== 'function') {
+    console.error('[SEV] extrairRegistrosXLS não carregado.');
+}
 
 function carregarMapeamentoMotoristas() {
     try {
@@ -476,6 +479,13 @@ function lerArquivoComoTexto(file, encoding) {
 }
 
 async function extrairRegistrosArquivo(file) {
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'xls' || ext === 'xlsx') {
+        return window.extrairRegistrosXLS(file);
+    }
+
+    // Suporte legado a CSV (tenta UTF-8 e ISO-8859-1 e usa o que render mais registros)
     const [textoUtf8, textoLatin1] = await Promise.all([
         lerArquivoComoTexto(file, 'UTF-8'),
         lerArquivoComoTexto(file, 'ISO-8859-1')
@@ -493,7 +503,7 @@ function renderizarItensExtraidos(itens) {
     renderizarPendencias(itens);
 
     if (itens.length === 0) {
-        resumoGeral.textContent = 'Nenhum registro processado. Verifique o formato do arquivo CSV.';
+        resumoGeral.textContent = 'Nenhum registro processado. Verifique o formato do arquivo.';
         return;
     }
 
@@ -524,7 +534,7 @@ async function processarArquivosSelecionados() {
     const arquivos = Array.from(fileInput.files || []);
 
     if (arquivos.length === 0) {
-        feedback.textContent = 'Selecione ao menos um arquivo CSV para continuar.';
+        feedback.textContent = 'Selecione ao menos um arquivo (.xls, .xlsx ou .csv) para continuar.';
         return;
     }
 
@@ -543,7 +553,25 @@ async function processarArquivosSelecionados() {
             })
         );
 
-        const itens = resultados.flat();
+        const itensBrutos = resultados.flat();
+        const vistos = new Set();
+        const itens = itensBrutos.filter(item => {
+            const chave = [
+                item.placa || '',
+                item.data || '',
+                item.hora_inicio || '',
+                item.hora_fim || '',
+                item.km_inicio || '',
+                item.km_fim || ''
+            ].join('|');
+            if (vistos.has(chave)) return false;
+            vistos.add(chave);
+            return true;
+        });
+        const duplicados = itensBrutos.length - itens.length;
+        if (duplicados > 0) {
+            console.log(`[SEV] ${duplicados} registro(s) duplicado(s) removido(s).`);
+        }
         console.log(`[SEV] Itens extraídos: ${itens.length}`);
         renderizarItensExtraidos(itens);
         feedback.textContent = '';
