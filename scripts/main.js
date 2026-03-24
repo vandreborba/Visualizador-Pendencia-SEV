@@ -375,13 +375,13 @@ function formatarRegistroMiniHtml(item, tipo) {
             <div class="reg-mini-topo">
                 <span class="reg-mini-data">${data}</span>
                 <span class="reg-mini-horario">${inicio}&nbsp;→&nbsp;${fim}</span>
+                <span class="reg-mini-rota">${origem}&nbsp;→&nbsp;${destino}</span>
             </div>
-            <div class="reg-mini-rota">${origem}&nbsp;→&nbsp;${destino}</div>
             <div class="reg-mini-rodape">
                 <span class="reg-mini-motorista">${motorista}</span>
                 <span class="reg-mini-finalidade">${finalidade}</span>
+                <span class="reg-mini-km">${kmLabel}: <strong>${km}</strong></span>
             </div>
-            <div class="reg-mini-km">${kmLabel}: <strong>${km}</strong></div>
         </div>`;
 }
 

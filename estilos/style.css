@@ -281,7 +281,6 @@ button:hover {
 .pendencia-cabecalho {
     margin-bottom: 10px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
@@ -383,75 +382,75 @@ th {
 
 .reg-mini {
     flex: 1;
-    padding: 12px 14px;
+    padding: 8px 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 3px;
     min-width: 0;
     background: #fff;
 }
 
+/* Linha 1: data + horário + rota */
 .reg-mini-topo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
 }
 
 .reg-mini-data {
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     font-weight: 700;
     background: #e0f2fe;
     color: #0c4a6e;
     border-radius: 999px;
-    padding: 2px 9px;
+    padding: 1px 7px;
     white-space: nowrap;
 }
 
 .reg-mini-horario {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: #374151;
+    white-space: nowrap;
 }
 
 .reg-mini-rota {
-    font-size: 0.83rem;
-    color: #4b5563;
-    line-height: 1.4;
+    font-size: 0.80rem;
+    color: #6b7280;
     overflow-wrap: anywhere;
 }
 
+/* Linha 2: motorista + finalidade + km */
 .reg-mini-rodape {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-    margin-top: 2px;
 }
 
 .reg-mini-motorista {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: #374151;
     font-weight: 500;
 }
 
 .reg-mini-finalidade {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     background: #f0fdf4;
     color: #166534;
     border: 1px solid #bbf7d0;
     border-radius: 999px;
-    padding: 1px 8px;
+    padding: 0px 7px;
     font-weight: 600;
     white-space: nowrap;
 }
 
 .reg-mini-km {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     color: #4b5563;
-    margin-top: auto;
-    padding-top: 8px;
-    border-top: 1px dashed #e2e8f0;
+    margin-left: auto;
+    white-space: nowrap;
 }
 
 .gap-separador {
