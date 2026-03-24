@@ -20,6 +20,7 @@ const nomeMotoristaInput = document.getElementById('nomeMotorista');
 const corpoTabelaMotoristas = document.querySelector('#tabelaMotoristas tbody');
 const CHAVE_LOCALSTORAGE_MOTORISTAS = 'sev_mapeamento_motoristas';
 let origemTelaMotoristas = 'upload';
+let ultimosItens = [];
 
 if (!btnProcessar || !fileInput || !telaUpload || !telaResultados) {
     console.error('[SEV] Elementos principais não encontrados no DOM.');
@@ -359,6 +360,31 @@ function identificarPendenciasPorViatura(itens) {
     return resultado.sort((a, b) => a.placa.localeCompare(b.placa));
 }
 
+function formatarRegistroMiniHtml(item, tipo) {
+    const data = item.data || '-';
+    const inicio = item.hora_inicio || '-';
+    const fim = item.hora_fim || '-';
+    const origem = item.origem || '-';
+    const destino = item.destino || '-';
+    const motorista = resolverNomeMotorista(item.motorista) || '-';
+    const finalidade = item.finalidade || '-';
+    const kmLabel = tipo === 'anterior' ? 'Km fim' : 'Km início';
+    const km = tipo === 'anterior' ? (item.km_fim || '-') : (item.km_inicio || '-');
+    return `
+        <div class="reg-mini">
+            <div class="reg-mini-topo">
+                <span class="reg-mini-data">${data}</span>
+                <span class="reg-mini-horario">${inicio}&nbsp;→&nbsp;${fim}</span>
+            </div>
+            <div class="reg-mini-rota">${origem}&nbsp;→&nbsp;${destino}</div>
+            <div class="reg-mini-rodape">
+                <span class="reg-mini-motorista">${motorista}</span>
+                <span class="reg-mini-finalidade">${finalidade}</span>
+            </div>
+            <div class="reg-mini-km">${kmLabel}: <strong>${km}</strong></div>
+        </div>`;
+}
+
 function renderizarPendencias(itens) {
     if (!listaPendencias) return;
     listaPendencias.innerHTML = '';
@@ -376,14 +402,15 @@ function renderizarPendencias(itens) {
         const card = document.createElement('article');
         card.className = 'pendencia-card';
 
-        const linhas = grupo.pendencias.map((pendencia) => `
-            <tr>
-                <td>${formatarResumoRegistro(pendencia.anterior)}</td>
-                <td>${pendencia.anterior.km_fim || '-'}</td>
-                <td>${formatarResumoRegistro(pendencia.posterior)}</td>
-                <td>${pendencia.posterior.km_inicio || '-'}</td>
-                <td class="diferenca-km">${pendencia.descricao}</td>
-            </tr>
+        const gapsHtml = grupo.pendencias.map((pendencia) => `
+            <div class="gap-item">
+                ${formatarRegistroMiniHtml(pendencia.anterior, 'anterior')}
+                <div class="gap-separador">
+                    <svg class="gap-icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    <span class="gap-badge-diferenca">${pendencia.descricao}</span>
+                </div>
+                ${formatarRegistroMiniHtml(pendencia.posterior, 'posterior')}
+            </div>
         `).join('');
 
         card.innerHTML = `
@@ -391,20 +418,7 @@ function renderizarPendencias(itens) {
                 <h3>Viatura ${grupo.placa}</h3>
                 <span class="pendencia-total">${grupo.pendencias.length} pendência(s)</span>
             </div>
-            <div class="tabela-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Registro anterior</th>
-                            <th>Km fim (anterior)</th>
-                            <th>Registro posterior</th>
-                            <th>Km início (posterior)</th>
-                            <th>Detalhe</th>
-                        </tr>
-                    </thead>
-                    <tbody>${linhas}</tbody>
-                </table>
-            </div>
+            <div class="pendencia-lista-gaps">${gapsHtml}</div>
         `;
 
         listaPendencias.appendChild(card);
@@ -498,6 +512,7 @@ async function extrairRegistrosArquivo(file) {
 }
 
 function renderizarItensExtraidos(itens) {
+    ultimosItens = itens;
     corpoTabelaItens.innerHTML = '';
     renderizarUsoPorViatura(itens);
     renderizarPendencias(itens);
@@ -589,6 +604,9 @@ btnGerenciarMotoristas.addEventListener('click', () => mostrarTelaMotoristas('re
 btnVoltarMotoristas.addEventListener('click', () => {
     if (origemTelaMotoristas === 'resultados') {
         mostrarTelaResultados();
+        if (ultimosItens.length > 0) {
+            renderizarItensExtraidos(ultimosItens);
+        }
         return;
     }
     mostrarTelaUpload();
